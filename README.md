@@ -1,7 +1,7 @@
 # dogs-track
 Modified YOLOv8 Tracking for dogs only
 
-#installation:
+# installation:
 
 git clone https://github.com/Lollykonkon/dogs-track/
 
