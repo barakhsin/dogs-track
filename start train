@@ -1,0 +1,2 @@
+source /home/sparklab/yolov8_tracking/venv/bin/activate
+/home/sparklab/yolov8_tracking/venv/bin/python "/home/sparklab/Рабочий стол/train.py"
