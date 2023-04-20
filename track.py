@@ -12,7 +12,7 @@ import pandas
 import sys
 import platform
 import numpy as np
-from pathlib import Path
+from pathlib import Path,PurePath,PosixPath
 import torch
 import torch.backends.cudnn as cudnn
 import time
@@ -241,6 +241,7 @@ def run(
                     df = pd.read_csv('/home/sparklab/yolov8_tracking/cameras_rtsp_urls1.csv')
                     name = (df['Street'][df['rtsp'] == source].values[-1])
                     rtsp_id = (df['ID'][df['rtsp'] == source].values[-1])
+                    area_id = (df['Area'][df['rtsp'] == source].values[-1])
 
                 # draw boxes for visualization
                 if len(outputs[i]) > 0:
@@ -260,26 +261,46 @@ def run(
                         id = output[4]
                         cls = output[5]
                         conf = output[6]
+                        count = 0
+                        frame = frame_idx + 1
                         # send data to site
                         if int(id) > max_id:
+                            current_times = str(current_time)
+
+
+                            # save_path1 = str((Path(save_dir).with_suffix(current_time)).with_suffix('.jpg'))
+                        
+                            save_path1 = str(txt_path + str(max_id) + '.jpg')  # force *.mp4 suffix on results videos
+                            # save_path1 = str(Path(p.name ).with_suffix('.jpg'))
+         
+                            # save_path1 = (save_path0).with_suffix('.jpg')
+                            # save_path1 = str(Path(p.name + current_time).with_suffix('.jpg'))
+                            # save_path1 = str(Path(save_path).with_suffix('.jpg')) #/yolo/runs/track/name/source_name.jpg
+                            
+                            cv2.imwrite(save_path1, im0)
+
                             max_id = int(id)
-                            cur_time = str('"'+current_time+'"')
+                            # cur_time = str('"'+current_time+'"')
                             info = [
                                 {"cid":rtsp_id,"datetime": current_time,"adress":name,"quantity":len(det)}
                                 ]
                             
-                            # Convert the data to JSON format 
-                            json_data = json.dumps(info) 
+                            # from initOldData import testoldnr
+                            # testoldnr[area_id] = max_id
 
-                            # Set the content type to JSON 
-                            headers = {'Content-Type': 'application/json'}
+                                                        
+                            # # Convert the data to JSON format 
+                            # json_data = json.dumps(info) 
 
-                            # Make the POST request to the API endpoint with the JSON data 
-                            response = requests.post(url, data=json_data, headers=headers) 
+                            # # Set the content type to JSON 
+                            # headers = {'Content-Type': 'application/json'}
 
-                            # Print the response status code 
-                            if response.status_code == 200:
-                                print('Data transfered successfully') 
+                            # # Make the POST request to the API endpoint with the JSON data 
+                            # response = requests.post(url, data=json_data, headers=headers) 
+
+                            # # Print the response status code 
+                            # if response.status_code == 200:
+                            #     print('Data transfered successfully') 
 
 
 
