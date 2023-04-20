@@ -165,6 +165,9 @@ def run(
         with dt[1]:
             preds = model(im, augment=augment, visualize=visualize)
 
+        
+        current_time = time.strftime("%Y/%m/%d, %H:%M:%S")
+
         # Apply NMS
         with dt[2]:
             if is_seg:
@@ -196,7 +199,8 @@ def run(
                     save_path = str(save_dir / p.parent.name)  # im.jpg, vid.mp4, ...
             curr_frames[i] = im0
 
-            txt_path = str(save_dir / 'tracks' / txt_file_name)  # im.txt
+            # txt_path = str(save_dir / 'tracks' / txt_file_name)  # im.txt
+            txt_path = str(save_dir / 'tracks' / p.parent.name)  # im.txt
             s += '%gx%g ' % im.shape[2:]  # print string
             imc = im0.copy() if save_crop else im0  # for save_crop
 
@@ -254,7 +258,6 @@ def run(
                         
                         bbox = output[0:4]
                         id = output[4]
-                        current_time = time.strftime("%Y/%m/%d, %H:%M:%S")
                         cls = output[5]
                         conf = output[6]
                         # send data to site
@@ -281,16 +284,22 @@ def run(
 
 
                         if save_txt:
-                            # to MOT format
-                            bbox_left = output[0]
-                            bbox_top = output[1]
-                            bbox_w = output[2] - output[0]
-                            bbox_h = output[3] - output[1]
-                            # Write MOT compliant results to file
-                            with open(txt_path + '.txt', 'a') as f:
-                                f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
-                                                               bbox_top, bbox_w, bbox_h, -1, -1, -1, i))
+                            # # to MOT format
+                            # bbox_left = output[0]
+                            # bbox_top = output[1]
+                            # bbox_w = output[2] - output[0]
+                            # bbox_h = output[3] - output[1]
+                            # # Write MOT compliant results to file
+                            # with open(txt_path + '.txt', 'a') as f:
+                            #     f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
+                            #                                    bbox_top, bbox_w, bbox_h, -1, -1, -1, i))
                             
+                            # Write data (cam_id, max_id)
+                            
+                            with open(txt_path + '_maxID.txt', 'w') as f:
+                                f.write(str(max_id))
+                            with open(txt_path + '_lastTime.txt', 'w') as f:
+                                f.write(current_time)
 
                                 # f.write(('%g ' + '\n') % (id))
 
