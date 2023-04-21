@@ -265,43 +265,31 @@ def run(
                         frame = frame_idx + 1
                         # send data to site
                         if int(id) > max_id:
-                            current_times = str(current_time)
-
-
-                            # save_path1 = str((Path(save_dir).with_suffix(current_time)).with_suffix('.jpg'))
-                        
-                            save_path1 = str(txt_path + str(max_id) + '.jpg')  # force *.mp4 suffix on results videos
-                            # save_path1 = str(Path(p.name ).with_suffix('.jpg'))
-         
-                            # save_path1 = (save_path0).with_suffix('.jpg')
-                            # save_path1 = str(Path(p.name + current_time).with_suffix('.jpg'))
-                            # save_path1 = str(Path(save_path).with_suffix('.jpg')) #/yolo/runs/track/name/source_name.jpg
-                            
-                            cv2.imwrite(save_path1, im0)
 
                             max_id = int(id)
-                            # cur_time = str('"'+current_time+'"')
+                            
+                            # save image of new detection with it's time 
+                            cur_time = time.strftime("%H:%M:%S")
+                            save_path1 = str(txt_path + str(cur_time) + '.jpg')
+                            cv2.imwrite(save_path1, im0)
+
+                            # prep data to send
                             info = [
                                 {"cid":rtsp_id,"datetime": current_time,"adress":name,"quantity":len(det)}
                                 ]
-                            
-                            # from initOldData import testoldnr
-                            # testoldnr[area_id] = max_id
+                 
+                            # Convert the data to JSON format 
+                            json_data = json.dumps(info) 
 
-                                                        
-                            # # Convert the data to JSON format 
-                            # json_data = json.dumps(info) 
+                            # Set the content type to JSON 
+                            headers = {'Content-Type': 'application/json'}
 
-                            # # Set the content type to JSON 
-                            # headers = {'Content-Type': 'application/json'}
+                            # Make the POST request to the API endpoint with the JSON data 
+                            response = requests.post(url, data=json_data, headers=headers) 
 
-                            # # Make the POST request to the API endpoint with the JSON data 
-                            # response = requests.post(url, data=json_data, headers=headers) 
-
-                            # # Print the response status code 
-                            # if response.status_code == 200:
-                            #     print('Data transfered successfully') 
-
+                            # Print the response status code 
+                            if response.status_code == 200:
+                                print('Data transfered successfully') 
 
 
                         if save_txt:
@@ -315,14 +303,12 @@ def run(
                             #     f.write(('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
                             #                                    bbox_top, bbox_w, bbox_h, -1, -1, -1, i))
                             
-                            # Write data (cam_id, max_id)
+                            # Write data (max_id, current_time)
                             
                             with open(txt_path + '_maxID.txt', 'w') as f:
                                 f.write(str(max_id))
                             with open(txt_path + '_lastTime.txt', 'w') as f:
                                 f.write(current_time)
-
-                                # f.write(('%g ' + '\n') % (id))
 
                        
                         if save_vid or save_crop or show_vid:  # Add bbox/seg to image
