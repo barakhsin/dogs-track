@@ -11,7 +11,8 @@ spq = np.array([1.1, 1.02, 1.0, 1.04, 1.11, 1.08, 1.15, 1.07, 0.97, 1.07]) # pow
 
 from max_id import numbers
 # testcamNumb=([5.0, 2.0, 4.0])
-testcamNumb = numbers('customA')
+testcamNumb = np.load('numbers.npy')
+print(testcamNumb)
 # For example we have vector - number of dogs fixed by camera inside week, cameras a fixed
 # camNumb[0] -- first camera, ..., camNumb[N-1] -- camera number N
 def estDogs(camNumb):
@@ -47,7 +48,7 @@ def prepData(sendnr):
 
 def sendData():
     # Set the URL 
-    url = "http://localhost:3001" 
+    url = "http://5.159.101.236:3001"
 
     # Create the data to send as a dictionary 
     with open('./MOCK_DATA.json', 'r') as f:
