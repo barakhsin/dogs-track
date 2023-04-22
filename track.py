@@ -41,7 +41,7 @@ from yolov8.ultralytics.yolo.utils.checks import check_file, check_imgsz, check_
 from yolov8.ultralytics.yolo.utils.files import increment_path
 from yolov8.ultralytics.yolo.utils.torch_utils import select_device
 from yolov8.ultralytics.yolo.utils.ops import Profile, non_max_suppression, scale_boxes, process_mask, process_mask_native
-from yolov8.ultralytics.yolo.utils.plotting import Annotator, colors
+from yolov8.ultralytics.yolo.utils.plotting import Annotator, colors, save_one_box
 
 from trackers.multi_tracker_zoo import create_tracker
 
@@ -200,9 +200,14 @@ def run(
             curr_frames[i] = im0
 
             # txt_path = str(save_dir / 'tracks' / txt_file_name)  # im.txt
-            txt_path = str(save_dir / 'tracks' / p.parent.name)  # im.txt
+            # txt_path = str(save_dir / 'tracks' / p.parent.name)  
+            txt_path = str(save_dir / p.parent.name)
+            # txt_path = str(save_dir / p) # im.txt
             s += '%gx%g ' % im.shape[2:]  # print string
             imc = im0.copy() if save_crop else im0  # for save_crop
+
+            with open(txt_path + '_lastTime.txt', 'w') as f:
+                f.write(current_time)
 
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             
@@ -235,13 +240,14 @@ def run(
 
                 name = str('Test')
                 rtsp_id = str('0')
+                
                 # take street and id values from csv
                 if source.startswith("rtsp"):
                     import pandas as pd
                     df = pd.read_csv('/home/sparklab/yolov8_tracking/cameras_rtsp_urls1.csv')
                     name = (df['Street'][df['rtsp'] == source].values[-1])
                     rtsp_id = (df['ID'][df['rtsp'] == source].values[-1])
-                    area_id = (df['Area'][df['rtsp'] == source].values[-1])
+                    # area_id = (df['Area'][df['rtsp'] == source].values[-1])
 
                 # draw boxes for visualization
                 if len(outputs[i]) > 0:
@@ -261,35 +267,11 @@ def run(
                         id = output[4]
                         cls = output[5]
                         conf = output[6]
-                        count = 0
-                        frame = frame_idx + 1
-                        # send data to site
-                        if int(id) > max_id:
+                        # count = 0
+                        # frame = frame_idx + 1
 
-                            max_id = int(id)
-                            
-                            # save image of new detection with it's time 
-                            cur_time = time.strftime("%H:%M:%S")
-                            save_path1 = str(txt_path + str(cur_time) + '.jpg')
-                            cv2.imwrite(save_path1, im0)
-
-                            # prep data to send
-                            info = [
-                                {"cid":rtsp_id,"datetime": current_time,"adress":name,"quantity":len(det)}
-                                ]
-                 
-                            # Convert the data to JSON format 
-                            json_data = json.dumps(info) 
-
-                            # Set the content type to JSON 
-                            headers = {'Content-Type': 'application/json'}
-
-                            # Make the POST request to the API endpoint with the JSON data 
-                            response = requests.post(url, data=json_data, headers=headers) 
-
-                            # Print the response status code 
-                            if response.status_code == 200:
-                                print('Data transfered successfully') 
+                        
+                        
 
 
                         if save_txt:
@@ -305,10 +287,9 @@ def run(
                             
                             # Write data (max_id, current_time)
                             
+
                             with open(txt_path + '_maxID.txt', 'w') as f:
                                 f.write(str(max_id))
-                            with open(txt_path + '_lastTime.txt', 'w') as f:
-                                f.write(current_time)
 
                        
                         if save_vid or save_crop or show_vid:  # Add bbox/seg to image
@@ -325,7 +306,40 @@ def run(
                             if save_crop:
                                 txt_file_name = txt_file_name if (isinstance(path, list) and len(path) > 1) else ''
                                 save_one_box(np.array(bbox, dtype=np.int16), imc, file=save_dir / 'crops' / txt_file_name / names[c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
+                        
+                        im1 = annotator.result()
+                        # send data to site
+                        if int(id) > max_id:
+                    
+                            max_id = int(id)
                             
+                            # save image of new detection with it's time 
+                            cur_time = time.strftime("%m:%d_%H:%M:%S")
+                            save_path1 = str(txt_path + str(cur_time) + '.jpg')
+                            # save_path1 = str(save_dir + str(cur_time) + '.jpg')
+
+                            # cv2.imwrite(save_path1, (im0.shape[1], im0.shape[0]))
+                            cv2.imwrite(save_path1, im1)
+
+                            # prep data to send
+                            info = [
+                                {"cid":rtsp_id,"datetime": current_time,"adress":name,"quantity":len(det)}
+                                ]
+                
+                            # Convert the data to JSON format 
+                            json_data = json.dumps(info) 
+
+                            # Set the content type to JSON 
+                            headers = {'Content-Type': 'application/json'}
+
+                            # Make the POST request to the API endpoint with the JSON data 
+                            response = requests.post(url, data=json_data, headers=headers) 
+
+                            # Print the response status code 
+                            if response.status_code == 200:
+                                print('Data transfered successfully') 
+
+
             else:
                 pass
                 #tracker_list[i].tracker.pred_n_update_all_tracks()
