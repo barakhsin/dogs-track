@@ -4,13 +4,14 @@ from time import sleep
 
 def start_process(url):
     return subprocess.Popen(
-        f"python worker.py {url}", shell=True, stdout=subprocess.PIPE)
+        f"python track.py --yolo-weights bestNano.pt --tracking-method ocsort --source \
+          {url} --nosave --save-txt --name customA --conf-thres 0.5", shell=True)
 
 def is_alive(process):
     return process.poll() is None
 
 if __name__ == "__main__":
-    n_urls = 10
+    n_urls = 6
     data = pd.read_csv("cameras_rtsp_urls1.csv")
     urls = data['rtsp'][:n_urls]
 
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     print("WATCHDOG - Running...")
 
     while True:
-        sleep(1)
+        sleep(10)
 
         print("WATCHDOG - Number of alive processes:",
               sum([is_alive(process)
