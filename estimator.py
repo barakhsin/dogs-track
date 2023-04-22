@@ -9,8 +9,9 @@ N = 10 # ten region of Yakutsk
 sqr = np.array([6.006, 11.851, 7.206, 1.748, 17.642, 16.248, 23.919, 13.604, 3.437, 19.96]) # square of regions of Yakutsk
 spq = np.array([1.1, 1.02, 1.0, 1.04, 1.11, 1.08, 1.15, 1.07, 0.97, 1.07]) # power of region
 
-
-testcamNumb=([5.0, 2.0, 4.0])
+from max_id import numbers
+# testcamNumb=([5.0, 2.0, 4.0])
+testcamNumb = numbers('customA')
 # For example we have vector - number of dogs fixed by camera inside week, cameras a fixed
 # camNumb[0] -- first camera, ..., camNumb[N-1] -- camera number N
 def estDogs(camNumb):
